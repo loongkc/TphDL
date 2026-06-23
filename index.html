@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegra.ph 漫画下载器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
+    </script>
+    <style>
+        :root {
+            --bg: #1a1d23;
+            --surface: #21252b;
+            --surface2: #282c34;
+            --border: #3a3f4b;
+            --text: #e1e4e8;
+            --text-secondary: #a0a6b0;
+            --accent: #5c9ce6;
+            --accent-hover: #4a8ad4;
+            --accent-glow: rgba(92, 156, 230, 0.25);
+            --danger: #e0556a;
+            --success: #4ec990;
+            --warning: #e5b567;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f5f6f8;
+                --surface: #ffffff;
+                --surface2: #f0f1f4;
+                --border: #d8dae0;
+                --text: #1a1d23;
+                --text-secondary: #5a5f6b;
+                --accent: #3b7dd8;
+                --accent-hover: #2e6bc4;
+                --accent-glow: rgba(59, 125, 216, 0.15);
+                --danger: #c93a4a;
+                --success: #2ea87a;
+                --warning: #b8861e;
+                --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+                --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -40%;
+            left: -20%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(ellipse at center, rgba(92, 156, 230, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -30%;
+            right: -15%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, rgba(78, 201, 144, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            padding: 40px 20px 30px;
+        }
+        .header .logo {
+            display: inline-block;
+            font-size: 48px;
+            margin-bottom: 8px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* 卡片 */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: var(--shadow);
+        }
+
+        /* 输入区域 */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .input-group input {
+            flex: 1 1 280px;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface2);
+            color: var(--text);
+            font-size: 15px;
+            font-family: var(--font-mono);
+            transition: var(--transition);
+            outline: none;
+            min-width: 200px;
+        }
+        .input-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        .input-group input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+            font-family: inherit;
+        }
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+        .btn-primary:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            filter: grayscale(20%);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .btn-outline.active {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover:not(:disabled) {
+            filter: brightness(1.1);
+            box-shadow: 0 6px 20px rgba(78, 201, 144, 0.3);
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        /* 格式选择 */
+        .format-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .format-selector .btn {
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+        .format-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+            background: var(--surface2);
+            color: var(--text-secondary);
+        }
+
+        /* 信息栏 */
+        .info-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .info-item .icon {
+            font-size: 18px;
+        }
+        .info-item strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        /* 预览网格 */
+        .preview-section {
+            margin-top: 16px;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 8px 4px;
+            scroll-behavior: smooth;
+        }
+        .preview-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .preview-grid::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .preview-grid::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        .preview-item {
+            position: relative;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            aspect-ratio: 3/4;
+            background: var(--surface2);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+        .preview-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 24px var(--accent-glow);
+            transform: translateY(-2px);
+            z-index: 2;
+        }
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: var(--transition);
+        }
+        .preview-item:hover img {
+            scale: 1.05;
+        }
+        .preview-item .page-number {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        .preview-item .check-overlay {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: var(--transition);
+        }
+        .preview-item.selected .check-overlay {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .preview-item.selected {
+            border-color: var(--success);
+        }
+
+        /* 全选行 */
+        .select-all-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin-top: 16px;
+            display: none;
+        }
+        .progress-container.active {
+            display: block;
+        }
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 10px;
+            background: var(--surface2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .progress-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 22px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideInRight 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow);
+            max-width: 400px;
+        }
+        .toast.error {
+            background: #4a1a22;
+            color: #fca5b3;
+            border: 1px solid #6b2a35;
+        }
+        .toast.success {
+            background: #1a3a2c;
+            color: #7ee8b8;
+            border: 1px solid #2a5a3c;
+        }
+        .toast.info {
+            background: #1a2a3a;
+            color: #8ec8f2;
+            border: 1px solid #2a4a5a;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        /* 加载动画 */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 22px;
+            }
+            .header .logo {
+                font-size: 36px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .input-group input {
+                font-size: 13px;
+                padding: 12px 14px;
+            }
+            .btn {
+                padding: 12px 18px;
+                font-size: 13px;
+            }
+            .preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                gap: 6px;
+                max-height: 360px;
+            }
+            .preview-item .page-number {
+                font-size: 10px;
+                padding: 1px 6px;
+                bottom: 4px;
+                right: 4px;
+            }
+            .format-selector .btn {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* 暗色滚动条 */
+        @media (prefers-color-scheme: dark) {
+            .preview-grid::-webkit-scrollbar-thumb {
+                background: #3a3f4b;
+            }
+            .preview-grid::-webkit-scrollbar-thumb:hover {
+                background: #4a4f5b;
+            }
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 32px;
+            opacity: 0.7;
+        }
+        .footer-note a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="logo">📚</div>
+            <h1>Telegra.ph 漫画下载器</h1>
+            <p class="subtitle">从 Telegraph 页面提取图片 · 支持 ZIP / CBZ / EPUB</p>
+        </div>
+
+        <!-- 输入卡片 -->
+        <div class="card">
+            <div class="input-group">
+                <input
+                type="url"
+                id="urlInput"
+                placeholder="粘贴 Telegra.ph 链接，例如 https://telegra.ph/漫画标题-12-31"
+                autocomplete="off"
+                />
+                <button class="btn btn-primary" id="fetchBtn" onclick="fetchPage()">
+                    🔍 获取漫画
+                </button>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:var(--text-secondary);">
+                💡 也支持 <code>telegra.ph</code> 短链接和带 <code>https://</code> 的完整链接
+            </div>
+        </div>
+
+        <!-- 漫画信息卡片（初始隐藏） -->
+        <div class="card" id="infoCard" style="display:none;">
+            <div class="info-bar" id="infoBar"></div>
+            <div class="select-all-row">
+                <button class="btn btn-sm btn-outline" onclick="selectAll()">✅ 全选</button>
+                <button class="btn btn-sm btn-outline" onclick="deselectAll()">⬜ 取消全选</button>
+                <span style="font-size:13px;color:var(--text-secondary);" id="selectionCount"></span>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+            <div class="format-selector">
+                <button class="btn btn-outline active format-btn" data-format="zip" onclick="selectFormat('zip', this)">
+                    📦 ZIP
+                </button>
+                <button class="btn btn-outline format-btn" data-format="cbz" onclick="selectFormat('cbz', this)">
+                    📖 CBZ
+                </button>
+                <button class="btn btn-outline format-btn" data-format="epub" onclick="selectFormat('epub', this)">
+                    📱 EPUB
+                </button>
+            </div>
+            <div style="margin-top:14px; text-align:center;">
+                <button class="btn btn-success" id="downloadBtn" onclick="startDownload()" style="min-width:200px;font-size:16px;">
+                    ⬇️ 开始下载
+                </button>
+            </div>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <p class="progress-text" id="progressText">准备中...</p>
+            </div>
+        </div>
+
+        <p class="footer-note">
+            所有处理均在浏览器本地完成，图片不会上传到任何服务器 ·
+            <a href="https://github.com/loongkc/Telegra.ph-Comic-Downloader" target="_blank" rel="noopener">开源项目</a>
+        </p>
+    </div>
+
+    <!-- Toast容器 -->
+    <div id="toastContainer"></div>
+
+    <script>
+        (function() {
+            // ==================== 全局状态 ====================
+            const state = {
+                pageData: null,
+                images: [], // { url, filename, ext, index }
+                selectedFormat: 'zip',
+                selectedIndices: new Set(),
+                isDownloading: false,
+            };
+
+            // ==================== DOM 引用 ====================
+            const $ = (sel) => document.querySelector(sel);
+            const $$ = (sel) => document.querySelectorAll(sel);
+
+            const urlInput = $('#urlInput');
+            const fetchBtn = $('#fetchBtn');
+            const infoCard = $('#infoCard');
+            const infoBar = $('#infoBar');
+            const previewGrid = $('#previewGrid');
+            const selectionCount = $('#selectionCount');
+            const downloadBtn = $('#downloadBtn');
+            const progressContainer = $('#progressContainer');
+            const progressBar = $('#progressBar');
+            const progressText = $('#progressText');
+            const toastContainer = $('#toastContainer');
+            const formatBtns = $$('.format-btn');
+
+            // ==================== Toast ====================
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                toastContainer.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease forwards';
+                    toast.addEventListener('animationend', () => toast.remove());
+                }, 2800);
+            }
+
+            // ==================== 格式选择 ====================
+            window.selectFormat = function(format, btnEl) {
+                state.selectedFormat = format;
+                formatBtns.forEach(b => b.classList.remove('active'));
+                if (btnEl) btnEl.classList.add('active');
+            };
+
+            // ==================== URL解析 ====================
+            function parseTelegraphPath(url) {
+                // 清理URL
+                let cleaned = url.trim();
+                // 去除可能的查询参数和hash
+                try {
+                    const u = new URL(cleaned);
+                    cleaned = u.origin + u.pathname;
+                } catch (e) {
+                    // 如果解析失败，尝试补全
+                    if (!/^https?:\/\//i.test(cleaned)) {
+                        cleaned = 'https://' + cleaned;
+                    }
+                    try {
+                        const u = new URL(cleaned);
+                        cleaned = u.origin + u.pathname;
+                    } catch (e2) {
+                        return null;
+                    }
+                }
+
+                // 提取路径部分（去掉域名）
+                let path = '';
+                try {
+                    const u = new URL(cleaned);
+                    if (!u.hostname.includes('telegra.ph')) {
+                        return null; // 不是telegra.ph域名
+                    }
+                    path = u.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
+                } catch (e) {
+                    return null;
+                }
+
+                if (!path || path.length < 3) return null;
+                return path;
+            }
+
+            // ==================== 获取页面数据 ====================
+            window.fetchPage = async function() {
+                if (state.isDownloading) {
+                    showToast('请等待当前下载完成', 'info');
+                    return;
+                }
+
+                const rawUrl = urlInput.value.trim();
+                if (!rawUrl) {
+                    showToast('请输入 Telegra.ph 链接', 'error');
+                    urlInput.focus();
+                    return;
+                }
+
+                const path = parseTelegraphPath(rawUrl);
+                if (!path) {
+                    showToast('无法解析链接，请确认是有效的 telegra.ph 链接', 'error');
+                    return;
+                }
+
+                // 显示加载状态
+                fetchBtn.disabled = true;
+                fetchBtn.innerHTML = '<span class="spinner"></span> 获取中...';
+                infoCard.style.display = 'none';
+                state.pageData = null;
+                state.images = [];
+                state.selectedIndices = new Set();
+
+                try {
+                    const apiUrl = `https://api.telegra.ph/getPage?path=${encodeURIComponent(path)}&return_content=true`;
+                    const response = await fetch(apiUrl);
+
+                    if (!response.ok) {
+                        throw new Error(`API 返回错误 (${response.status})`);
+                    }
+
+                    const data = await response.json();
+
+                    if (!data.ok || !data.result) {
+                        throw new Error('页面不存在或无法访问');
+                    }
+
+                    state.pageData = data.result;
+                    extractImages(data.result);
+                    renderInfo();
+                    renderPreview();
+                    infoCard.style.display = 'block';
+                    infoCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    updateSelectionUI();
+                    showToast(`✅ 成功获取！共找到 ${state.images.length} 张图片`, 'success');
+
+                } catch (err) {
+                    console.error('获取页面失败:', err);
+                    let msg = '获取失败：';
+                    if (err.message.includes('API 返回错误')) {
+                        msg += err.message;
+                    } else if (err.message.includes('页面不存在')) {
+                        msg += '页面不存在或已被删除';
+                    } else if (err.name === 'TypeError' && err.message.includes('fetch')) {
+                        msg += '网络连接失败，请检查网络或稍后重试';
+                    } else {
+                        msg += err.message;
+                    }
+                    showToast(msg, 'error');
+                } finally {
+                    fetchBtn.disabled = false;
+                    fetchBtn.innerHTML = '🔍 获取漫画';
+                }
+            };
+
+            // ==================== 提取图片 ====================
+            function extractImages(pageData) {
+                const images = [];
+                const content = pageData.content || [];
+
+                function traverse(nodes) {
+                    if (!nodes || !Array.isArray(nodes)) return;
+                    for (const node of nodes) {
+                        if (node.tag === 'img' && node.attrs && node.attrs.src) {
+                            let src = node.attrs.src;
+                            // 补全URL
+                            if (src.startsWith('/')) {
+                                src = 'https://telegra.ph' + src;
+                            } else if (!src.startsWith('http')) {
+                                src = 'https://telegra.ph/' + src;
+                            }
+                            const urlObj = new URL(src);
+                            const pathname = urlObj.pathname;
+                            const filename = pathname.split('/').pop() || `image_${images.length + 1}.jpg`;
+                            const extMatch = filename.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i);
+                            const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+
+                            images.push({
+                                url: src,
+                                filename: filename,
+                                ext: ext,
+                                index: images.length,
+                            });
+                        }
+                        if (node.children && Array.isArray(node.children)) {
+                            traverse(node.children);
+                        }
+                        if (node.tag === 'figure' && node.children) {
+                            traverse(node.children);
+                        }
+                    }
+                }
+
+                traverse(content);
+
+                // 去重（基于URL）
+                const seen = new Set();
+                const uniqueImages = [];
+                for (const img of images) {
+                    if (!seen.has(img.url)) {
+                        seen.add(img.url);
+                        img.index = uniqueImages.length;
+                        uniqueImages.push(img);
+                    }
+                }
+
+                state.images = uniqueImages;
+                // 默认全选
+                state.selectedIndices = new Set(state.images.map((_, i) => i));
+            }
+
+            // ==================== 渲染信息栏 ====================
+            function renderInfo() {
+                const pd = state.pageData;
+                const title = pd.title || '未命名漫画';
+                const author = pd.author_name || '未知作者';
+                const imageCount = state.images.length;
+                const url = pd.url || '';
+
+                infoBar.innerHTML = `
+                    <div class="info-item">
+                        <span class="icon">📝</span>
+                        <span>标题: <strong>${escapeHtml(title)}</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">✍️</span>
+                        <span>作者: <strong>${escapeHtml(author)}</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="tag">${imageCount} 张图片</span>
+                    </div>
+                `;
+            }
+
+            // ==================== 渲染预览 ====================
+            function renderPreview() {
+                previewGrid.innerHTML = '';
+                if (state.images.length === 0) {
+                    previewGrid.innerHTML =
+                        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-secondary);">😕 该页面没有找到图片</div>';
+                    return;
+                }
+
+                state.images.forEach((img, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'preview-item selected';
+                    item.dataset.index = i;
+                    item.title = `第 ${i + 1} 页 - ${img.filename}`;
+                    item.onclick = () => toggleImageSelection(i, item);
+
+                    const imgEl = document.createElement('img');
+                    imgEl.src = img.url;
+                    imgEl.alt = `Page ${i + 1}`;
+                    imgEl.loading = 'lazy';
+                    imgEl.onerror = function() {
+                        this.src =
+                            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="130" height="170" fill="%233a3f4b"><rect width="130" height="170" rx="8"/><text x="65" y="90" text-anchor="middle" fill="%23a0a6b0" font-size="14">加载失败</text></svg>';
+                    };
+
+                    const pageNum = document.createElement('span');
+                    pageNum.className = 'page-number';
+                    pageNum.textContent = `${i + 1}`;
+
+                    const checkOverlay = document.createElement('span');
+                    checkOverlay.className = 'check-overlay';
+                    checkOverlay.textContent = '✓';
+
+                    item.appendChild(imgEl);
+                    item.appendChild(pageNum);
+                    item.appendChild(checkOverlay);
+                    previewGrid.appendChild(item);
+                });
+
+                updateSelectionUI();
+            }
+
+            // ==================== 切换图片选择 ====================
+            function toggleImageSelection(index, itemEl) {
+                if (state.selectedIndices.has(index)) {
+                    state.selectedIndices.delete(index);
+                    if (itemEl) itemEl.classList.remove('selected');
+                } else {
+                    state.selectedIndices.add(index);
+                    if (itemEl) itemEl.classList.add('selected');
+                }
+                updateSelectionUI();
+            }
+
+            window.selectAll = function() {
+                state.images.forEach((_, i) => state.selectedIndices.add(i));
+                previewGrid.querySelectorAll('.preview-item').forEach(el => el.classList.add('selected'));
+                updateSelectionUI();
+            };
+
+            window.deselectAll = function() {
+                state.selectedIndices.clear();
+                previewGrid.querySelectorAll('.preview-item').forEach(el => el.classList.remove('selected'));
+                updateSelectionUI();
+            };
+
+            function updateSelectionUI() {
+                const count = state.selectedIndices.size;
+                const total = state.images.length;
+                selectionCount.textContent = `已选择 ${count} / ${total} 张图片`;
+                downloadBtn.disabled = count === 0 || state.isDownloading;
+                if (count === 0 && !state.isDownloading) {
+                    downloadBtn.style.opacity = '0.5';
+                } else {
+                    downloadBtn.style.opacity = '1';
+                }
+            }
+
+            // ==================== 下载逻辑 ====================
+            window.startDownload = async function() {
+                if (state.isDownloading) return;
+                if (state.selectedIndices.size === 0) {
+                    showToast('请至少选择一张图片', 'error');
+                    return;
+                }
+
+                const selectedImages = state.images.filter((_, i) => state.selectedIndices.has(i));
+                if (selectedImages.length === 0) return;
+
+                state.isDownloading = true;
+                downloadBtn.disabled = true;
+                fetchBtn.disabled = true;
+                downloadBtn.innerHTML = '<span class="spinner"></span> 准备下载...';
+                progressContainer.classList.add('active');
+                progressBar.style.width = '0%';
+                progressText.textContent = '正在下载图片...';
+
+                const format = state.selectedFormat;
+                const title = sanitizeFilename(state.pageData?.title || 'telegraph-comic');
+                const totalImages = selectedImages.length;
+
+                try {
+                    // 第一步：下载所有选中的图片
+                    const downloadedImages = [];
+                    const concurrency = 8; // 并发数
+
+                    for (let batchStart = 0; batchStart < totalImages; batchStart += concurrency) {
+                        const batchEnd = Math.min(batchStart + concurrency, totalImages);
+                        const batch = selectedImages.slice(batchStart, batchEnd);
+
+                        const batchResults = await Promise.allSettled(
+                            batch.map(async (imgInfo, batchIdx) => {
+                                const globalIdx = batchStart + batchIdx;
+                                const blob = await downloadImageWithRetry(imgInfo.url, 2);
+                                return {
+                                    ...imgInfo,
+                                    blob,
+                                    success: !!blob,
+                                    globalIdx,
+                                };
+                            })
+                        );
+
+                        for (const result of batchResults) {
+                            if (result.status === 'fulfilled' && result.value.success) {
+                                downloadedImages.push(result.value);
+                            } else {
+                                const imgInfo = result.status === 'fulfilled' ? result.value :
+                                    batch[result.value?.globalIdx || 0];
+                                console.warn('图片下载失败:', imgInfo?.url);
+                            }
+                        }
+
+                        // 更新进度（下载阶段占40%）
+                        const downloadProgress = Math.min(
+                            (batchEnd / totalImages) * 40,
+                            40
+                        );
+                        progressBar.style.width = downloadProgress + '%';
+                        progressText.textContent =
+                            `下载图片中... ${Math.min(batchEnd, totalImages)} / ${totalImages}`;
+
+                        // 批次间小延迟
+                        if (batchEnd < totalImages) {
+                            await sleep(150);
+                        }
+                    }
+
+                    if (downloadedImages.length === 0) {
+                        throw new Error('所有图片下载失败，请检查网络或图片是否可访问');
+                    }
+
+                    if (downloadedImages.length < totalImages) {
+                        showToast(`⚠️ ${totalImages - downloadedImages.length} 张图片下载失败，将继续打包剩余的`, 'info');
+                    }
+
+                    // 第二步：打包
+                    progressBar.style.width = '45%';
+                    progressText.textContent = '正在打包文件...';
+
+                    let blob, fileExtension;
+
+                    if (format === 'epub') {
+                        blob = await createEpub(title, downloadedImages, (packProgress) => {
+                            const overallProgress = 45 + packProgress * 0.55;
+                            progressBar.style.width = Math.min(overallProgress, 100) + '%';
+                            progressText.textContent =
+                                `正在生成 EPUB... ${Math.round(packProgress * 100)}%`;
+                        });
+                        fileExtension = 'epub';
+                    } else if (format === 'cbz') {
+                        blob = await createZip(downloadedImages, (packProgress) => {
+                            const overallProgress = 45 + packProgress * 0.55;
+                            progressBar.style.width = Math.min(overallProgress, 100) + '%';
+                            progressText.textContent =
+                                `正在生成 CBZ... ${Math.round(packProgress * 100)}%`;
+                        });
+                        fileExtension = 'cbz';
+                    } else {
+                        blob = await createZip(downloadedImages, (packProgress) => {
+                            const overallProgress = 45 + packProgress * 0.55;
+                            progressBar.style.width = Math.min(overallProgress, 100) + '%';
+                            progressText.textContent =
+                                `正在生成 ZIP... ${Math.round(packProgress * 100)}%`;
+                        });
+                        fileExtension = 'zip';
+                    }
+
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '✅ 打包完成！正在触发下载...';
+
+                    // 触发下载
+                    const safeTitle = sanitizeFilename(title);
+                    const finalFilename = `${safeTitle}.${fileExtension}`;
+                    triggerDownload(blob, finalFilename);
+
+                    showToast(`🎉 下载已开始！共 ${downloadedImages.length} 张图片`, 'success');
+
+                    // 短暂延迟后重置UI
+                    await sleep(800);
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '✅ 完成！';
+
+                } catch (err) {
+                    console.error('下载失败:', err);
+                    showToast('下载失败：' + err.message, 'error');
+                    progressText.textContent = '❌ 下载失败';
+                } finally {
+                    state.isDownloading = false;
+                    downloadBtn.disabled = false;
+                    fetchBtn.disabled = false;
+                    downloadBtn.innerHTML = '⬇️ 开始下载';
+                    updateSelectionUI();
+                    // 延迟隐藏进度条
+                    setTimeout(() => {
+                        if (!state.isDownloading) {
+                            progressContainer.classList.remove('active');
+                            progressBar.style.width = '0%';
+                        }
+                    }, 2000);
+                }
+            };
+
+            // ==================== 下载图片（带重试） ====================
+            async function downloadImageWithRetry(url, maxRetries) {
+                for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    try {
+                        const response = await fetch(url, {
+                            mode: 'cors',
+                            signal: AbortSignal.timeout(30000),
+                        });
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        return await response.blob();
+                    } catch (err) {
+                        if (attempt === maxRetries - 1) {
+                            console.warn(`图片下载最终失败 (${url}):`, err.message);
+                            return null;
+                        }
+                        // 等待后重试
+                        await sleep(1000 * (attempt + 1));
+                    }
+                }
+                return null;
+            }
+
+            // ==================== 创建ZIP/CBZ ====================
+            async function createZip(imagesWithBlobs, progressCallback) {
+                const zip = new JSZip();
+                const total = imagesWithBlobs.length;
+                const padding = String(total).length;
+
+                for (let i = 0; i < total; i++) {
+                    const img = imagesWithBlobs[i];
+                    const pageNum = String(i + 1).padStart(padding, '0');
+                    const ext = img.ext || 'jpg';
+                    const filename = `${pageNum}.${ext}`;
+                    zip.file(filename, img.blob, { compression: 'DEFLATE', compressionOptions: { level: 6 } });
+
+                    if (progressCallback && i % 3 === 0) {
+                        progressCallback(i / total);
+                    }
+                }
+
+                if (progressCallback) progressCallback(1);
+
+                const blob = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 },
+                }, (meta) => {
+                    if (progressCallback && meta.percent) {
+                        progressCallback(meta.percent / 100);
+                    }
+                });
+
+                return blob;
+            }
+
+            // ==================== 创建EPUB ====================
+            async function createEpub(title, imagesWithBlobs, progressCallback) {
+                const zip = new JSZip();
+                const total = imagesWithBlobs.length;
+                const padding = String(total).length;
+                const uuid = generateUUID();
+                const safeTitle = escapeXml(title);
+
+                // 1. mimetype（必须第一个，不压缩）
+                zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+
+                // 2. META-INF/container.xml
+                const containerXml = `<?xml version="1.0" encoding="UTF-8"?>
+        <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+            <rootfiles>
+                <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+            </rootfiles>
+        </container>`;
+                zip.folder('META-INF').file('container.xml', containerXml);
+
+                // 3. 创建OEBPS文件夹
+                const oebps = zip.folder('OEBPS');
+                const imagesFolder = oebps.folder('images');
+
+                // 添加所有图片
+                const imageEntries = [];
+                for (let i = 0; i < total; i++) {
+                    const img = imagesWithBlobs[i];
+                    const pageNum = String(i + 1).padStart(padding, '0');
+                    const ext = img.ext || 'jpg';
+                    const imgFilename = `img_${pageNum}.${ext}`;
+                    const imgPath = `images/${imgFilename}`;
+
+                    imagesFolder.file(imgFilename, img.blob);
+
+                    const mimeType = getMimeType(ext);
+                    imageEntries.push({
+                        id: `img${pageNum}`,
+                        href: imgPath,
+                        mediaType: mimeType,
+                        pageNum: pageNum,
+                    });
+
+                    if (progressCallback && i % 3 === 0) {
+                        progressCallback((i / total) * 0.6);
+                    }
+                }
+
+                // 4. 为每张图片创建XHTML页面
+                const pageEntries = [];
+                for (let i = 0; i < total; i++) {
+                    const imgEntry = imageEntries[i];
+                    const pageId = `page${imgEntry.pageNum}`;
+                    const pageFilename = `page_${imgEntry.pageNum}.xhtml`;
+
+                    const xhtmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE html>
+        <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+        <head>
+            <title>第 ${i + 1} 页</title>
+            <meta charset="UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <style>
+                body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
+                img { max-width: 100%; max-height: 100vh; object-fit: contain; display: block; }
+                @media (prefers-color-scheme: dark) { body { background: #1a1a1a; } }
+            </style>
+        </head>
+        <body>
+            <div style="text-align:center;">
+                <img src="${imgEntry.href}" alt="第 ${i + 1} 页"/>
+            </div>
+        </body>
+        </html>`;
+
+                    oebps.file(pageFilename, xhtmlContent);
+                    pageEntries.push({
+                        id: pageId,
+                        href: pageFilename,
+                        mediaType: 'application/xhtml+xml',
+                    });
+
+                    if (progressCallback && i % 3 === 0) {
+                        progressCallback(0.6 + (i / total) * 0.25);
+                    }
+                }
+
+                // 5. content.opf
+                const manifestItems = [
+                    ...pageEntries.map(p =>
+                        `<item id="${p.id}" href="${p.href}" media-type="${p.mediaType}"/>`
+                    ),
+                    ...imageEntries.map(img =>
+                        `<item id="${img.id}" href="${img.href}" media-type="${img.mediaType}"/>`
+                    ),
+                ].join('\n                ');
+
+                const spineItems = pageEntries.map(p =>
+                    `<itemref idref="${p.id}"/>`
+                ).join('\n            ');
+
+                const contentOpf = `<?xml version="1.0" encoding="UTF-8"?>
+        <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">
+            <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+                <dc:title>${safeTitle}</dc:title>
+                <dc:identifier id="book-id">urn:uuid:${uuid}</dc:identifier>
+                <dc:language>zh-CN</dc:language>
+                <dc:date>${new Date().toISOString().split('T')[0]}</dc:date>
+                <meta property="rendition:layout">pre-paginated</meta>
+                <meta property="rendition:spread">none</meta>
+                <meta property="rendition:orientation">portrait</meta>
+                <meta name="generator" content="Telegra.ph Comic Downloader"/>
+            </metadata>
+            <manifest>
+                ${manifestItems}
+            </manifest>
+            <spine>
+                ${spineItems}
+            </spine>
+        </package>`;
+
+                oebps.file('content.opf', contentOpf);
+
+                // 6. toc.ncx（EPUB 2兼容）
+                const navPoints = pageEntries.map((p, i) => `
+                <navPoint id="nav${p.id}" playOrder="${i + 1}">
+                    <navLabel><text>第 ${i + 1} 页</text></navLabel>
+                    <content src="${p.href}"/>
+                </navPoint>`).join('');
+
+                const tocNcx = `<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+        <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+            <head>
+                <meta name="dtb:uid" content="urn:uuid:${uuid}"/>
+                <meta name="dtb:depth" content="1"/>
+                <meta name="dtb:totalPageCount" content="${total}"/>
+                <meta name="dtb:maxPageNumber" content="${total}"/>
+            </head>
+            <docTitle><text>${safeTitle}</text></docTitle>
+            <navMap>
+        ${navPoints}
+            </navMap>
+        </ncx>`;
+
+                oebps.file('toc.ncx', tocNcx);
+
+                if (progressCallback) progressCallback(0.95);
+
+                // 生成EPUB
+                const blob = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 },
+                }, (meta) => {
+                    if (progressCallback && meta.percent) {
+                        progressCallback(0.95 + (meta.percent / 100) * 0.05);
+                    }
+                });
+
+                if (progressCallback) progressCallback(1);
+                return blob;
+            }
+
+            // ==================== 触发下载 ====================
+            function triggerDownload(blob, filename) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                // 延迟清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 3000);
+            }
+
+            // ==================== 工具函数 ====================
+            function sanitizeFilename(name) {
+                if (!name || typeof name !== 'string') return 'comic';
+                // 移除或替换不安全的字符
+                let safe = name
+                    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '')
+                    .replace(/\s+/g, '_')
+                    .replace(/\.{2,}/g, '.')
+                    .trim();
+                // 限制长度
+                if (safe.length > 120) safe = safe.substring(0, 120);
+                if (!safe) safe = 'comic';
+                return safe;
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function escapeXml(str) {
+                if (!str) return '';
+                return str
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&apos;');
+            }
+
+            function getMimeType(ext) {
+                const map = {
+                    'jpg': 'image/jpeg',
+                    'jpeg': 'image/jpeg',
+                    'png': 'image/png',
+                    'gif': 'image/gif',
+                    'webp': 'image/webp',
+                    'bmp': 'image/bmp',
+                    'svg': 'image/svg+xml',
+                };
+                return map[ext.toLowerCase()] || 'image/jpeg';
+            }
+
+            function generateUUID() {
+                if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                    return crypto.randomUUID();
+                }
+                // fallback
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // ==================== 初始化和事件监听 ====================
+            function init() {
+                // 回车键触发获取
+                urlInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        fetchPage();
+                    }
+                });
+
+                // 初始状态
+                downloadBtn.disabled = true;
+                progressContainer.classList.remove('active');
+                infoCard.style.display = 'none';
+
+                // 尝试从剪贴板读取（需要用户交互或权限）
+                // 这里不做自动读取，但可以做粘贴事件处理
+                urlInput.addEventListener('paste', () => {
+                    // 粘贴后自动触发获取（可选，这里保持手动）
+                    // 用户可自行点击按钮或按回车
+                });
+
+                console.log('📚 Telegra.ph 漫画下载器已就绪');
+                console.log('  支持格式: ZIP / CBZ / EPUB');
+                console.log('  所有处理均在浏览器本地完成 ✅');
+            }
+
+            // 启动
+            init();
+
+            // ==================== 暴露全局函数 ====================
+            // 已在HTML中使用onclick绑定，此处确保全局可访问
+            window.fetchPage = fetchPage;
+            window.selectFormat = selectFormat;
+            window.selectAll = selectAll;
+            window.deselectAll = deselectAll;
+            window.startDownload = startDownload;
+        })();
+    </script>
+</body>
+</html>
