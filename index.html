@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegra.ph 漫画下载器</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --bg: #1a1d23;
@@ -47,11 +46,7 @@
             }
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -62,14 +57,11 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 背景装饰 */
         body::before {
             content: '';
             position: fixed;
-            top: -40%;
-            left: -20%;
-            width: 80%;
-            height: 80%;
+            top: -40%; left: -20%;
+            width: 80%; height: 80%;
             background: radial-gradient(ellipse at center, rgba(92, 156, 230, 0.04) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
@@ -77,10 +69,8 @@
         body::after {
             content: '';
             position: fixed;
-            bottom: -30%;
-            right: -15%;
-            width: 60%;
-            height: 60%;
+            bottom: -30%; right: -15%;
+            width: 60%; height: 60%;
             background: radial-gradient(ellipse at center, rgba(78, 201, 144, 0.03) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
@@ -94,11 +84,7 @@
             z-index: 1;
         }
 
-        /* 头部 */
-        .header {
-            text-align: center;
-            padding: 40px 20px 30px;
-        }
+        .header { text-align: center; padding: 40px 20px 30px; }
         .header .logo {
             display: inline-block;
             font-size: 48px;
@@ -106,13 +92,8 @@
             animation: float 3s ease-in-out infinite;
         }
         @keyframes float {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         .header h1 {
             font-size: 28px;
@@ -124,13 +105,8 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .header .subtitle {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
+        .header .subtitle { font-size: 14px; color: var(--text-secondary); font-weight: 400; }
 
-        /* 卡片 */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -140,16 +116,9 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
         }
-        .card:hover {
-            box-shadow: var(--shadow);
-        }
+        .card:hover { box-shadow: var(--shadow); }
 
-        /* 输入区域 */
-        .input-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .input-group { display: flex; gap: 10px; flex-wrap: wrap; }
         .input-group input {
             flex: 1 1 280px;
             padding: 14px 18px;
@@ -167,11 +136,8 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--accent-glow);
         }
-        .input-group input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.6;
-            font-family: inherit;
-        }
+        .input-group input::placeholder { color: var(--text-secondary); opacity: 0.6; font-family: inherit; }
+
         .btn {
             padding: 14px 24px;
             border: none;
@@ -185,77 +151,115 @@
             position: relative;
             overflow: hidden;
         }
-        .btn:active {
-            transform: scale(0.97);
-        }
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-        }
-        .btn-primary:hover:not(:disabled) {
-            background: var(--accent-hover);
-            box-shadow: 0 6px 20px var(--accent-glow);
-        }
-        .btn-primary:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            filter: grayscale(20%);
-        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 6px 20px var(--accent-glow); }
+        .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(20%); }
         .btn-outline {
             background: transparent;
             border: 2px solid var(--border);
             color: var(--text);
         }
-        .btn-outline:hover:not(:disabled) {
-            border-color: var(--accent);
-            background: var(--accent-glow);
-        }
+        .btn-outline:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-glow); }
         .btn-outline.active {
             border-color: var(--accent);
             background: var(--accent-glow);
             color: var(--accent);
             font-weight: 700;
         }
-        .btn-success {
-            background: var(--success);
-            color: #fff;
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-success:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 6px 20px rgba(78, 201, 144, 0.3); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 6px; }
+
+        /* 设置面板 */
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 4px 0;
+            transition: var(--transition);
         }
-        .btn-success:hover:not(:disabled) {
-            filter: brightness(1.1);
-            box-shadow: 0 6px 20px rgba(78, 201, 144, 0.3);
+        .settings-toggle:hover { color: var(--text); }
+        .settings-toggle .chevron {
+            transition: transform var(--transition);
+            font-size: 12px;
+            display: inline-block;
         }
-        .btn-sm {
-            padding: 8px 16px;
+        .settings-toggle.open .chevron { transform: rotate(180deg); }
+        .settings-body {
+            display: none;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border);
+            animation: fadeIn 0.25s ease;
+        }
+        .settings-body.open { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .settings-body label {
+            display: block;
             font-size: 13px;
-            border-radius: 6px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
         }
+        .settings-body .proxy-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface2);
+            color: var(--text);
+            font-size: 13px;
+            font-family: var(--font-mono);
+            outline: none;
+            transition: var(--transition);
+        }
+        .settings-body .proxy-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .settings-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            line-height: 1.7;
+        }
+        .settings-hint code {
+            background: var(--surface2);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+        .settings-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .settings-status.on { background: rgba(78, 201, 144, 0.12); color: var(--success); }
+        .settings-status.off { background: var(--surface2); color: var(--text-secondary); }
 
         /* 格式选择 */
-        .format-selector {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
+        .format-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
         .format-selector .btn {
             flex: 1;
             min-width: 80px;
             text-align: center;
             padding: 12px 16px;
             font-size: 14px;
-        }
-        .format-badge {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin-left: 6px;
-            vertical-align: middle;
-            background: var(--surface2);
-            color: var(--text-secondary);
         }
 
         /* 信息栏 */
@@ -275,13 +279,8 @@
             font-size: 14px;
             color: var(--text-secondary);
         }
-        .info-item .icon {
-            font-size: 18px;
-        }
-        .info-item strong {
-            color: var(--text);
-            font-weight: 600;
-        }
+        .info-item .icon { font-size: 18px; }
+        .info-item strong { color: var(--text); font-weight: 600; }
         .tag {
             display: inline-block;
             padding: 4px 10px;
@@ -293,9 +292,6 @@
         }
 
         /* 预览网格 */
-        .preview-section {
-            margin-top: 16px;
-        }
         .preview-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -305,16 +301,10 @@
             padding: 8px 4px;
             scroll-behavior: smooth;
         }
-        .preview-grid::-webkit-scrollbar {
-            width: 6px;
-        }
-        .preview-grid::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .preview-grid::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
+        .preview-grid::-webkit-scrollbar { width: 6px; }
+        .preview-grid::-webkit-scrollbar-track { background: transparent; }
+        .preview-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
         .preview-item {
             position: relative;
             border-radius: var(--radius-sm);
@@ -333,19 +323,15 @@
             z-index: 2;
         }
         .preview-item img {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: cover;
             display: block;
             transition: var(--transition);
         }
-        .preview-item:hover img {
-            scale: 1.05;
-        }
+        .preview-item:hover img { scale: 1.05; }
         .preview-item .page-number {
             position: absolute;
-            bottom: 6px;
-            right: 6px;
+            bottom: 6px; right: 6px;
             background: rgba(0, 0, 0, 0.7);
             color: #fff;
             font-size: 11px;
@@ -356,10 +342,8 @@
         }
         .preview-item .check-overlay {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            width: 22px;
-            height: 22px;
+            top: 8px; left: 8px;
+            width: 22px; height: 22px;
             border-radius: 50%;
             background: var(--success);
             display: flex;
@@ -372,15 +356,9 @@
             transform: scale(0.5);
             transition: var(--transition);
         }
-        .preview-item.selected .check-overlay {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .preview-item.selected {
-            border-color: var(--success);
-        }
+        .preview-item.selected .check-overlay { opacity: 1; transform: scale(1); }
+        .preview-item.selected { border-color: var(--success); }
 
-        /* 全选行 */
         .select-all-row {
             display: flex;
             gap: 8px;
@@ -390,13 +368,8 @@
         }
 
         /* 进度条 */
-        .progress-container {
-            margin-top: 16px;
-            display: none;
-        }
-        .progress-container.active {
-            display: block;
-        }
+        .progress-container { margin-top: 16px; display: none; }
+        .progress-container.active { display: block; }
         .progress-bar-wrapper {
             width: 100%;
             height: 10px;
@@ -421,8 +394,7 @@
         /* Toast */
         .toast {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 20px; right: 20px;
             padding: 14px 22px;
             border-radius: var(--radius-sm);
             font-size: 14px;
@@ -432,47 +404,22 @@
             box-shadow: var(--shadow);
             max-width: 400px;
         }
-        .toast.error {
-            background: #4a1a22;
-            color: #fca5b3;
-            border: 1px solid #6b2a35;
-        }
-        .toast.success {
-            background: #1a3a2c;
-            color: #7ee8b8;
-            border: 1px solid #2a5a3c;
-        }
-        .toast.info {
-            background: #1a2a3a;
-            color: #8ec8f2;
-            border: 1px solid #2a4a5a;
-        }
+        .toast.error { background: #4a1a22; color: #fca5b3; border: 1px solid #6b2a35; }
+        .toast.success { background: #1a3a2c; color: #7ee8b8; border: 1px solid #2a5a3c; }
+        .toast.info { background: #1a2a3a; color: #8ec8f2; border: 1px solid #2a4a5a; }
+        .toast.warning { background: #4a3a1a; color: #f2d88e; border: 1px solid #6b552a; }
         @keyframes slideInRight {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(120%);
-                opacity: 0;
-            }
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(120%); opacity: 0; }
         }
 
-        /* 加载动画 */
         .spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             border: 3px solid var(--border);
             border-top-color: var(--accent);
             border-radius: 50%;
@@ -480,56 +427,26 @@
             vertical-align: middle;
             margin-right: 6px;
         }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* 响应式 */
         @media (max-width: 640px) {
-            .header h1 {
-                font-size: 22px;
-            }
-            .header .logo {
-                font-size: 36px;
-            }
-            .card {
-                padding: 16px;
-            }
-            .input-group input {
-                font-size: 13px;
-                padding: 12px 14px;
-            }
-            .btn {
-                padding: 12px 18px;
-                font-size: 13px;
-            }
+            .header h1 { font-size: 22px; }
+            .header .logo { font-size: 36px; }
+            .card { padding: 16px; }
+            .input-group input { font-size: 13px; padding: 12px 14px; }
+            .btn { padding: 12px 18px; font-size: 13px; }
             .preview-grid {
                 grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
                 gap: 6px;
                 max-height: 360px;
             }
-            .preview-item .page-number {
-                font-size: 10px;
-                padding: 1px 6px;
-                bottom: 4px;
-                right: 4px;
-            }
-            .format-selector .btn {
-                padding: 10px 12px;
-                font-size: 12px;
-            }
+            .preview-item .page-number { font-size: 10px; padding: 1px 6px; bottom: 4px; right: 4px; }
+            .format-selector .btn { padding: 10px 12px; font-size: 12px; }
         }
 
-        /* 暗色滚动条 */
         @media (prefers-color-scheme: dark) {
-            .preview-grid::-webkit-scrollbar-thumb {
-                background: #3a3f4b;
-            }
-            .preview-grid::-webkit-scrollbar-thumb:hover {
-                background: #4a4f5b;
-            }
+            .preview-grid::-webkit-scrollbar-thumb { background: #3a3f4b; }
+            .preview-grid::-webkit-scrollbar-thumb:hover { background: #4a4f5b; }
         }
 
         .footer-note {
@@ -539,29 +456,24 @@
             margin-top: 32px;
             opacity: 0.7;
         }
-        .footer-note a {
-            color: var(--accent);
-            text-decoration: none;
-        }
+        .footer-note a { color: var(--accent); text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
         <div class="header">
             <div class="logo">📚</div>
             <h1>Telegra.ph 漫画下载器</h1>
             <p class="subtitle">从 Telegraph 页面提取图片 · 支持 ZIP / CBZ / EPUB</p>
         </div>
 
-        <!-- 输入卡片 -->
         <div class="card">
             <div class="input-group">
                 <input
-                type="url"
-                id="urlInput"
-                placeholder="粘贴 Telegra.ph 链接，例如 https://telegra.ph/漫画标题-12-31"
-                autocomplete="off"
+                    type="url"
+                    id="urlInput"
+                    placeholder="粘贴 Telegra.ph 链接，例如 https://telegra.ph/漫画标题-12-31"
+                    autocomplete="off"
                 />
                 <button class="btn btn-primary" id="fetchBtn" onclick="fetchPage()">
                     🔍 获取漫画
@@ -572,7 +484,34 @@
             </div>
         </div>
 
-        <!-- 漫画信息卡片（初始隐藏） -->
+        <!-- 高级设置（代理配置） -->
+        <div class="card">
+            <div class="settings-toggle" id="settingsToggle" onclick="toggleSettings()">
+                <span>⚙️ 高级设置（CORS 代理，可选）</span>
+                <span class="chevron">▼</span>
+            </div>
+            <div class="settings-body" id="settingsBody">
+                <label for="proxyInput">CORS 代理前缀</label>
+                <input
+                    type="text"
+                    id="proxyInput"
+                    class="proxy-input"
+                    placeholder="例如：https://your-proxy.workers.dev/?url="
+                    autocomplete="off"
+                    spellcheck="false"
+                />
+                <div class="settings-hint">
+                    仅当图片<b>直连失败</b>（跨域 / 429 限流）时才会自动使用该代理重试。<br>
+                    代理会把完整图片 URL 拼接在前缀之后，因此前缀需包含 <code>?url=</code> 或 <code>?</code>。<br>
+                    留空则不使用代理。设置会自动保存在浏览器本地。
+                </div>
+                <div id="proxyStatus" class="settings-status off">
+                    <span>○ 未配置代理</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 漫画信息卡片 -->
         <div class="card" id="infoCard" style="display:none;">
             <div class="info-bar" id="infoBar"></div>
             <div class="select-all-row">
@@ -582,15 +521,9 @@
             </div>
             <div class="preview-grid" id="previewGrid"></div>
             <div class="format-selector">
-                <button class="btn btn-outline active format-btn" data-format="zip" onclick="selectFormat('zip', this)">
-                    📦 ZIP
-                </button>
-                <button class="btn btn-outline format-btn" data-format="cbz" onclick="selectFormat('cbz', this)">
-                    📖 CBZ
-                </button>
-                <button class="btn btn-outline format-btn" data-format="epub" onclick="selectFormat('epub', this)">
-                    📱 EPUB
-                </button>
+                <button class="btn btn-outline active format-btn" data-format="zip" onclick="selectFormat('zip', this)">📦 ZIP</button>
+                <button class="btn btn-outline format-btn" data-format="cbz" onclick="selectFormat('cbz', this)">📖 CBZ</button>
+                <button class="btn btn-outline format-btn" data-format="epub" onclick="selectFormat('epub', this)">📱 EPUB</button>
             </div>
             <div style="margin-top:14px; text-align:center;">
                 <button class="btn btn-success" id="downloadBtn" onclick="startDownload()" style="min-width:200px;font-size:16px;">
@@ -611,29 +544,38 @@
         </p>
     </div>
 
-    <!-- Toast容器 -->
     <div id="toastContainer"></div>
 
     <script>
         (function() {
+            'use strict';
+
+            // ==================== 常量 ====================
+            const STORAGE_KEY_PROXY = 'tph_proxy_prefix_v1';
+            const ERROR_PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="130" height="170">' +
+                '<rect width="130" height="170" rx="8" fill="#3a3f4b"/>' +
+                '<text x="65" y="90" text-anchor="middle" fill="#a0a6b0" font-size="14">加载失败</text>' +
+                '</svg>'
+            );
+            const DOWNLOAD_TIMEOUT_MS = 30000;
+            const DOWNLOAD_CONCURRENCY = 8;
+            const PER_STAGE_RETRIES = 2;
+
             // ==================== 全局状态 ====================
             const state = {
                 pageData: null,
-                images: [], // { url, filename, ext, index }
+                images: [],
                 selectedFormat: 'zip',
                 selectedIndices: new Set(),
                 isDownloading: false,
+                proxyPrefix: '',
             };
 
-            // ==================== 跨域代理配置 ====================
-            // 仅当直连下载因跨域(CORS)失败时，才使用该代理重试
-            const CORS_PROXY = 'https://telegraph-proxy.loong-539.workers.dev/?url=';
-            // 记录已知需要走代理的图片主机，同主机后续图片直接走代理，避免重复失败
+            // 记录已知需要走代理的主机（同主机后续图片优先走代理）
             const proxyRequiredHosts = new Set();
-            // 本次下载中经代理成功下载的图片数量
-            let proxyUsedCount = 0;
-            // 预览阶段代理回退计数（用于提示）
-            let previewProxyFallbackCount = 0;
+            // 统计
+            let stats = { direct: 0, proxy: 0, failed: 0, previewProxy: 0 };
 
             // ==================== DOM 引用 ====================
             const $ = (sel) => document.querySelector(sel);
@@ -651,6 +593,53 @@
             const progressText = $('#progressText');
             const toastContainer = $('#toastContainer');
             const formatBtns = $$('.format-btn');
+            const proxyInput = $('#proxyInput');
+            const proxyStatus = $('#proxyStatus');
+            const settingsToggle = $('#settingsToggle');
+            const settingsBody = $('#settingsBody');
+
+            // ==================== 配置：代理前缀 ====================
+            function loadProxyPrefix() {
+                try {
+                    const v = localStorage.getItem(STORAGE_KEY_PROXY);
+                    return v || '';
+                } catch (e) {
+                    return '';
+                }
+            }
+            function saveProxyPrefix(value) {
+                try {
+                    if (value) localStorage.setItem(STORAGE_KEY_PROXY, value);
+                    else localStorage.removeItem(STORAGE_KEY_PROXY);
+                } catch (e) { /* 忽略存储错误（隐私模式等） */ }
+            }
+            function getProxyPrefix() {
+                return state.proxyPrefix;
+            }
+            function applyProxyPrefix(value) {
+                state.proxyPrefix = (value || '').trim();
+                updateProxyStatusUI();
+            }
+            function updateProxyStatusUI() {
+                if (state.proxyPrefix) {
+                    proxyStatus.className = 'settings-status on';
+                    proxyStatus.innerHTML = '<span>● 已启用代理</span>';
+                } else {
+                    proxyStatus.className = 'settings-status off';
+                    proxyStatus.innerHTML = '<span>○ 未配置代理</span>';
+                }
+            }
+            function buildProxyUrl(url) {
+                const prefix = getProxyPrefix();
+                if (!prefix) return null;
+                return prefix + encodeURIComponent(url);
+            }
+
+            // ==================== 设置面板交互 ====================
+            window.toggleSettings = function() {
+                const isOpen = settingsBody.classList.toggle('open');
+                settingsToggle.classList.toggle('open', isOpen);
+            };
 
             // ==================== Toast ====================
             function showToast(message, type = 'info') {
@@ -658,10 +647,12 @@
                 toast.className = `toast ${type}`;
                 toast.textContent = message;
                 toastContainer.appendChild(toast);
-                setTimeout(() => {
+                const removeTimer = setTimeout(() => {
                     toast.style.animation = 'slideOutRight 0.3s ease forwards';
-                    toast.addEventListener('animationend', () => toast.remove());
+                    toast.addEventListener('animationend', () => toast.remove(), { once: true });
                 }, 2800);
+                // 若组件被清理则取消定时器
+                toast.addEventListener('remove', () => clearTimeout(removeTimer), { once: true });
             }
 
             // ==================== 格式选择 ====================
@@ -671,19 +662,14 @@
                 if (btnEl) btnEl.classList.add('active');
             };
 
-            // ==================== URL解析 ====================
+            // ==================== URL 解析 ====================
             function parseTelegraphPath(url) {
-                // 清理URL
                 let cleaned = url.trim();
-                // 去除可能的查询参数和hash
                 try {
                     const u = new URL(cleaned);
                     cleaned = u.origin + u.pathname;
                 } catch (e) {
-                    // 如果解析失败，尝试补全
-                    if (!/^https?:\/\//i.test(cleaned)) {
-                        cleaned = 'https://' + cleaned;
-                    }
+                    if (!/^https?:\/\//i.test(cleaned)) cleaned = 'https://' + cleaned;
                     try {
                         const u = new URL(cleaned);
                         cleaned = u.origin + u.pathname;
@@ -691,21 +677,15 @@
                         return null;
                     }
                 }
-
-                // 提取路径部分（去掉域名）
-                let path = '';
                 try {
                     const u = new URL(cleaned);
-                    if (!u.hostname.includes('telegra.ph')) {
-                        return null; // 不是telegra.ph域名
-                    }
-                    path = u.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
+                    if (!u.hostname.includes('telegra.ph')) return null;
+                    const path = u.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
+                    if (!path || path.length < 3) return null;
+                    return path;
                 } catch (e) {
                     return null;
                 }
-
-                if (!path || path.length < 3) return null;
-                return path;
             }
 
             // ==================== 获取页面数据 ====================
@@ -728,28 +708,21 @@
                     return;
                 }
 
-                // 显示加载状态
                 fetchBtn.disabled = true;
                 fetchBtn.innerHTML = '<span class="spinner"></span> 获取中...';
                 infoCard.style.display = 'none';
                 state.pageData = null;
                 state.images = [];
                 state.selectedIndices = new Set();
-                previewProxyFallbackCount = 0;
+                stats = { direct: 0, proxy: 0, failed: 0, previewProxy: 0 };
 
                 try {
                     const apiUrl = `https://api.telegra.ph/getPage?path=${encodeURIComponent(path)}&return_content=true`;
-                    const response = await fetch(apiUrl);
-
-                    if (!response.ok) {
-                        throw new Error(`API 返回错误 (${response.status})`);
-                    }
+                    const response = await fetchWithTimeout(apiUrl, 20000);
+                    if (!response.ok) throw new Error(`API 返回错误 (${response.status})`);
 
                     const data = await response.json();
-
-                    if (!data.ok || !data.result) {
-                        throw new Error('页面不存在或无法访问');
-                    }
+                    if (!data.ok || !data.result) throw new Error('页面不存在或无法访问');
 
                     state.pageData = data.result;
                     extractImages(data.result);
@@ -758,20 +731,20 @@
                     infoCard.style.display = 'block';
                     infoCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     updateSelectionUI();
-                    showToast(`✅ 成功获取！共找到 ${state.images.length} 张图片`, 'success');
 
+                    if (state.images.length === 0) {
+                        showToast('⚠️ 该页面没有找到图片', 'warning');
+                    } else {
+                        showToast(`✅ 成功获取！共找到 ${state.images.length} 张图片`, 'success');
+                    }
                 } catch (err) {
                     console.error('获取页面失败:', err);
                     let msg = '获取失败：';
-                    if (err.message.includes('API 返回错误')) {
-                        msg += err.message;
-                    } else if (err.message.includes('页面不存在')) {
-                        msg += '页面不存在或已被删除';
-                    } else if (err.name === 'TypeError' && err.message.includes('fetch')) {
-                        msg += '网络连接失败，请检查网络或稍后重试';
-                    } else {
-                        msg += err.message;
-                    }
+                    if (err.name === 'AbortError') msg += '请求超时，请稍后重试';
+                    else if (err.message.includes('API 返回错误')) msg += err.message;
+                    else if (err.message.includes('页面不存在')) msg += '页面不存在或已被删除';
+                    else if (err.name === 'TypeError') msg += '网络连接失败，请检查网络或稍后重试';
+                    else msg += err.message;
                     showToast(msg, 'error');
                 } finally {
                     fetchBtn.disabled = false;
@@ -787,31 +760,28 @@
                 function traverse(nodes) {
                     if (!nodes || !Array.isArray(nodes)) return;
                     for (const node of nodes) {
+                        if (!node || typeof node !== 'object') continue;
+
                         if (node.tag === 'img' && node.attrs && node.attrs.src) {
                             let src = node.attrs.src;
-                            // 补全URL
-                            if (src.startsWith('/')) {
-                                src = 'https://telegra.ph' + src;
-                            } else if (!src.startsWith('http')) {
-                                src = 'https://telegra.ph/' + src;
-                            }
-                            const urlObj = new URL(src);
-                            const pathname = urlObj.pathname;
-                            const filename = pathname.split('/').pop() || `image_${images.length + 1}.jpg`;
-                            const extMatch = filename.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i);
-                            const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+                            if (src.startsWith('//')) src = 'https:' + src;
+                            else if (src.startsWith('/')) src = 'https://telegra.ph' + src;
+                            else if (!src.startsWith('http')) src = 'https://telegra.ph/' + src;
 
-                            images.push({
-                                url: src,
-                                filename: filename,
-                                ext: ext,
-                                index: images.length,
-                            });
+                            try {
+                                const urlObj = new URL(src);
+                                const pathname = urlObj.pathname;
+                                const filename = pathname.split('/').pop() || `image_${images.length + 1}.jpg`;
+                                const extMatch = filename.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i);
+                                const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+
+                                images.push({ url: src, filename, ext, index: images.length });
+                            } catch (e) {
+                                console.warn('跳过无效图片 URL:', src);
+                            }
                         }
+
                         if (node.children && Array.isArray(node.children)) {
-                            traverse(node.children);
-                        }
-                        if (node.tag === 'figure' && node.children) {
                             traverse(node.children);
                         }
                     }
@@ -819,7 +789,7 @@
 
                 traverse(content);
 
-                // 去重（基于URL）
+                // 去重
                 const seen = new Set();
                 const uniqueImages = [];
                 for (const img of images) {
@@ -831,7 +801,6 @@
                 }
 
                 state.images = uniqueImages;
-                // 默认全选
                 state.selectedIndices = new Set(state.images.map((_, i) => i));
             }
 
@@ -841,7 +810,6 @@
                 const title = pd.title || '未命名漫画';
                 const author = pd.author_name || '未知作者';
                 const imageCount = state.images.length;
-                const url = pd.url || '';
 
                 infoBar.innerHTML = `
                     <div class="info-item">
@@ -858,7 +826,7 @@
                 `;
             }
 
-            // ==================== 渲染预览（保持直接加载，失败时代理回退） ====================
+            // ==================== 渲染预览 ====================
             function renderPreview() {
                 previewGrid.innerHTML = '';
                 if (state.images.length === 0) {
@@ -867,37 +835,42 @@
                     return;
                 }
 
+                const fragment = document.createDocumentFragment();
+
                 state.images.forEach((img, i) => {
                     const item = document.createElement('div');
                     item.className = 'preview-item selected';
                     item.dataset.index = i;
                     item.title = `第 ${i + 1} 页 - ${img.filename}`;
-                    item.onclick = () => toggleImageSelection(i, item);
+                    item.addEventListener('click', () => toggleImageSelection(i, item));
 
                     const imgEl = document.createElement('img');
-                    // 保持原有的直接加载逻辑不变
-                    imgEl.src = img.url;
                     imgEl.alt = `Page ${i + 1}`;
                     imgEl.loading = 'lazy';
-                    // 标记该 img 是否已经尝试过代理回退，防止无限循环
+                    imgEl.decoding = 'async';
+                    imgEl.dataset.originalSrc = img.url;
                     imgEl.dataset.proxyRetry = 'false';
 
-                    imgEl.onerror = function() {
-                        // 如果已经尝试过代理回退，则显示占位图
+                    imgEl.addEventListener('error', function onImgError() {
+                        // 已经尝试过代理 → 最终失败
                         if (this.dataset.proxyRetry === 'true') {
-                            this.src =
-                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="130" height="170" fill="%233a3f4b"><rect width="130" height="170" rx="8"/><text x="65" y="90" text-anchor="middle" fill="%23a0a6b0" font-size="14">加载失败</text></svg>';
+                            this.src = ERROR_PLACEHOLDER;
                             return;
                         }
-                        // 标记已回退，并尝试使用代理加载
+                        // 未配置代理 → 直接显示失败
+                        const proxyUrl = buildProxyUrl(this.dataset.originalSrc);
+                        if (!proxyUrl) {
+                            this.src = ERROR_PLACEHOLDER;
+                            return;
+                        }
+                        // 走代理重试（只重试一次）
                         this.dataset.proxyRetry = 'true';
-                        previewProxyFallbackCount++;
-                        const proxyUrl = CORS_PROXY + encodeURIComponent(this.dataset.originalSrc || img.url);
+                        stats.previewProxy++;
                         this.src = proxyUrl;
-                    };
+                    });
 
-                    // 保存原始地址，供代理回退使用
-                    imgEl.dataset.originalSrc = img.url;
+                    // 首次加载：直连
+                    imgEl.src = img.url;
 
                     const pageNum = document.createElement('span');
                     pageNum.className = 'page-number';
@@ -910,13 +883,14 @@
                     item.appendChild(imgEl);
                     item.appendChild(pageNum);
                     item.appendChild(checkOverlay);
-                    previewGrid.appendChild(item);
+                    fragment.appendChild(item);
                 });
 
+                previewGrid.appendChild(fragment);
                 updateSelectionUI();
             }
 
-            // ==================== 切换图片选择 ====================
+            // ==================== 选择相关 ====================
             function toggleImageSelection(index, itemEl) {
                 if (state.selectedIndices.has(index)) {
                     state.selectedIndices.delete(index);
@@ -945,14 +919,10 @@
                 const total = state.images.length;
                 selectionCount.textContent = `已选择 ${count} / ${total} 张图片`;
                 downloadBtn.disabled = count === 0 || state.isDownloading;
-                if (count === 0 && !state.isDownloading) {
-                    downloadBtn.style.opacity = '0.5';
-                } else {
-                    downloadBtn.style.opacity = '1';
-                }
+                downloadBtn.style.opacity = (count === 0 && !state.isDownloading) ? '0.5' : '1';
             }
 
-            // ==================== 下载逻辑 ====================
+            // ==================== 下载主流程 ====================
             window.startDownload = async function() {
                 if (state.isDownloading) return;
                 if (state.selectedIndices.size === 0) {
@@ -964,7 +934,8 @@
                 if (selectedImages.length === 0) return;
 
                 state.isDownloading = true;
-                proxyUsedCount = 0;
+                stats = { direct: 0, proxy: 0, failed: 0, previewProxy: stats.previewProxy };
+
                 downloadBtn.disabled = true;
                 fetchBtn.disabled = true;
                 downloadBtn.innerHTML = '<span class="spinner"></span> 准备下载...';
@@ -977,114 +948,97 @@
                 const totalImages = selectedImages.length;
 
                 try {
-                    // 第一步：下载所有选中的图片
+                    // ============ 第一步：并发下载所有选中图片 ============
                     const downloadedImages = [];
-                    const concurrency = 8; // 并发数
+                    const failedImages = [];
 
-                    for (let batchStart = 0; batchStart < totalImages; batchStart += concurrency) {
-                        const batchEnd = Math.min(batchStart + concurrency, totalImages);
+                    for (let batchStart = 0; batchStart < totalImages; batchStart += DOWNLOAD_CONCURRENCY) {
+                        const batchEnd = Math.min(batchStart + DOWNLOAD_CONCURRENCY, totalImages);
                         const batch = selectedImages.slice(batchStart, batchEnd);
 
                         const batchResults = await Promise.allSettled(
-                            batch.map(async (imgInfo, batchIdx) => {
-                                const globalIdx = batchStart + batchIdx;
-                                const blob = await downloadImageWithRetry(imgInfo.url, 2);
-                                return {
-                                    ...imgInfo,
-                                    blob,
-                                    success: !!blob,
-                                    globalIdx,
-                                };
+                            batch.map(async (imgInfo) => {
+                                const blob = await downloadImageWithRetry(imgInfo.url, PER_STAGE_RETRIES);
+                                return { imgInfo, blob };
                             })
                         );
 
                         for (const result of batchResults) {
-                            if (result.status === 'fulfilled' && result.value.success) {
-                                downloadedImages.push(result.value);
+                            if (result.status === 'fulfilled' && result.value.blob) {
+                                downloadedImages.push({ ...result.value.imgInfo, blob: result.value.blob });
+                            } else if (result.status === 'fulfilled') {
+                                failedImages.push(result.value.imgInfo);
                             } else {
-                                const imgInfo = result.status === 'fulfilled' ? result.value :
-                                    batch[result.value?.globalIdx || 0];
-                                console.warn('图片下载失败:', imgInfo?.url);
+                                // Promise 被 reject（理论上不应出现）
+                                console.warn('下载任务异常:', result.reason);
                             }
                         }
 
-                        // 更新进度（下载阶段占40%）
-                        const downloadProgress = Math.min(
-                            (batchEnd / totalImages) * 40,
-                            40
-                        );
+                        const downloadProgress = Math.min((batchEnd / totalImages) * 40, 40);
                         progressBar.style.width = downloadProgress + '%';
                         progressText.textContent =
-                            `下载图片中... ${Math.min(batchEnd, totalImages)} / ${totalImages}`;
+                            `下载图片中... ${Math.min(batchEnd, totalImages)} / ${totalImages}` +
+                            (stats.proxy > 0 ? `（代理 ${stats.proxy}）` : '');
 
-                        // 批次间小延迟
-                        if (batchEnd < totalImages) {
-                            await sleep(150);
-                        }
+                        if (batchEnd < totalImages) await sleep(120);
                     }
+
+                    stats.failed = failedImages.length;
 
                     if (downloadedImages.length === 0) {
                         throw new Error('所有图片下载失败，请检查网络或图片是否可访问');
                     }
 
-                    if (downloadedImages.length < totalImages) {
-                        showToast(`⚠️ ${totalImages - downloadedImages.length} 张图片下载失败，将继续打包剩余的`, 'info');
+                    if (failedImages.length > 0) {
+                        showToast(
+                            `⚠️ ${failedImages.length} 张图片下载失败，将继续打包剩余的 ${downloadedImages.length} 张`,
+                            'warning'
+                        );
                     }
 
-                    // 第二步：打包
+                    // ============ 第二步：打包 ============
                     progressBar.style.width = '45%';
                     progressText.textContent = '正在打包文件...';
 
-                    let blob, fileExtension;
+                    const packProgressCb = (label) => (packProgress) => {
+                        const overall = 45 + packProgress * 0.55;
+                        progressBar.style.width = Math.min(overall, 100) + '%';
+                        progressText.textContent = `正在生成 ${label}... ${Math.round(packProgress * 100)}%`;
+                    };
 
+                    let blob, fileExtension;
                     if (format === 'epub') {
-                        blob = await createEpub(title, downloadedImages, (packProgress) => {
-                            const overallProgress = 45 + packProgress * 0.55;
-                            progressBar.style.width = Math.min(overallProgress, 100) + '%';
-                            progressText.textContent =
-                                `正在生成 EPUB... ${Math.round(packProgress * 100)}%`;
-                        });
+                        blob = await createEpub(title, downloadedImages, packProgressCb('EPUB'));
                         fileExtension = 'epub';
                     } else if (format === 'cbz') {
-                        blob = await createZip(downloadedImages, (packProgress) => {
-                            const overallProgress = 45 + packProgress * 0.55;
-                            progressBar.style.width = Math.min(overallProgress, 100) + '%';
-                            progressText.textContent =
-                                `正在生成 CBZ... ${Math.round(packProgress * 100)}%`;
-                        });
+                        blob = await createZip(downloadedImages, packProgressCb('CBZ'));
                         fileExtension = 'cbz';
                     } else {
-                        blob = await createZip(downloadedImages, (packProgress) => {
-                            const overallProgress = 45 + packProgress * 0.55;
-                            progressBar.style.width = Math.min(overallProgress, 100) + '%';
-                            progressText.textContent =
-                                `正在生成 ZIP... ${Math.round(packProgress * 100)}%`;
-                        });
+                        blob = await createZip(downloadedImages, packProgressCb('ZIP'));
                         fileExtension = 'zip';
                     }
 
                     progressBar.style.width = '100%';
                     progressText.textContent = '✅ 打包完成！正在触发下载...';
 
-                    // 触发下载
                     const safeTitle = sanitizeFilename(title);
                     const finalFilename = `${safeTitle}.${fileExtension}`;
                     triggerDownload(blob, finalFilename);
 
-                    const proxyNote = proxyUsedCount > 0 ?
-                        `（其中 ${proxyUsedCount} 张经代理下载）` : '';
-                    const previewNote = previewProxyFallbackCount > 0 ?
-                        `，预览时有 ${previewProxyFallbackCount} 张经代理加载` : '';
-                    showToast(`🎉 下载已开始！共 ${downloadedImages.length} 张图片${proxyNote}${previewNote}`, 'success');
+                    // 组装提示信息
+                    let summary = `🎉 下载已开始！共 ${downloadedImages.length} 张图片`;
+                    const extras = [];
+                    if (stats.proxy > 0) extras.push(`代理下载 ${stats.proxy} 张`);
+                    if (stats.failed > 0) extras.push(`失败 ${stats.failed} 张`);
+                    if (extras.length) summary += `（${extras.join('，')}）`;
+                    showToast(summary, 'success');
 
-                    // 短暂延迟后重置UI
                     await sleep(800);
-                    progressBar.style.width = '100%';
                     progressText.textContent = '✅ 完成！';
 
                 } catch (err) {
                     console.error('下载失败:', err);
-                    showToast('下载失败：' + err.message, 'error');
+                    showToast('下载失败：' + (err.message || '未知错误'), 'error');
                     progressText.textContent = '❌ 下载失败';
                 } finally {
                     state.isDownloading = false;
@@ -1092,7 +1046,6 @@
                     fetchBtn.disabled = false;
                     downloadBtn.innerHTML = '⬇️ 开始下载';
                     updateSelectionUI();
-                    // 延迟隐藏进度条
                     setTimeout(() => {
                         if (!state.isDownloading) {
                             progressContainer.classList.remove('active');
@@ -1102,78 +1055,129 @@
                 }
             };
 
-            // ==================== 跨域代理工具 ====================
-            function buildProxyUrl(url) {
-                return CORS_PROXY + encodeURIComponent(url);
+            // ==================== 网络工具 ====================
+            function fetchWithTimeout(url, timeoutMs, options = {}) {
+                // 优先使用 AbortSignal.timeout（现代浏览器）
+                if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+                    return fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
+                }
+                // 降级方案
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
             }
 
             function getHostOf(url) {
-                try {
-                    return new URL(url).host;
-                } catch (e) {
-                    return '';
-                }
+                try { return new URL(url).host; } catch (e) { return ''; }
             }
 
             /**
-             * 单次抓取图片，返回 Blob（失败抛异常）
-             * @param {string} url 原始图片地址
-             * @param {boolean} useProxy 是否走代理
+             * 获取单张图片的 Blob。失败时抛出带 status 的 Error。
+             * @param {string} url 图片原始地址
+             * @param {string|null} proxyPrefix 代理前缀（null 表示直连）
              */
-            async function fetchImageBlob(url, useProxy) {
-                const target = useProxy ? buildProxyUrl(url) : url;
-                const response = await fetch(target, {
-                    mode: 'cors',
-                    signal: AbortSignal.timeout(30000),
-                });
+            async function fetchImageBlob(url, proxyPrefix) {
+                const target = proxyPrefix ? proxyPrefix + encodeURIComponent(url) : url;
+                const response = await fetchWithTimeout(target, DOWNLOAD_TIMEOUT_MS, { mode: 'cors' });
+
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    const err = new Error(`HTTP ${response.status}`);
+                    err.status = response.status;
+                    throw err;
                 }
+
                 const blob = await response.blob();
-                if (!blob || blob.size === 0) {
-                    throw new Error('空响应');
-                }
-                // 代理有时会返回 HTML 错误页，做个类型校验
+                if (!blob || blob.size === 0) throw new Error('响应内容为空');
+                // 校验类型：真正图片的 content-type 不会以 text/ 开头
                 if (blob.type && /^text\//i.test(blob.type)) {
-                    throw new Error('返回内容不是图片');
+                    throw new Error('返回内容不是图片（可能是错误页）');
+                }
+                // 前端简单校验图片魔数（jpg / png / gif / webp / bmp）
+                if (!looksLikeImage(blob)) {
+                    throw new Error('响应内容不是有效图片');
                 }
                 return blob;
             }
 
-            // ==================== 下载图片（直连优先 + 跨域代理重试） ====================
-            async function downloadImageWithRetry(url, maxRetries) {
+            // 读取 blob 头部若干字节做魔数校验，避免把 HTML/JSON 存成图片
+            async function looksLikeImage(blob) {
+                try {
+                    const head = new Uint8Array(await blob.slice(0, 12).arrayBuffer());
+                    // JPEG: FF D8 FF
+                    if (head[0] === 0xFF && head[1] === 0xD8 && head[2] === 0xFF) return true;
+                    // PNG: 89 50 4E 47
+                    if (head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4E && head[3] === 0x47) return true;
+                    // GIF: 47 49 46
+                    if (head[0] === 0x47 && head[1] === 0x49 && head[2] === 0x46) return true;
+                    // BMP: 42 4D
+                    if (head[0] === 0x42 && head[1] === 0x4D) return true;
+                    // WebP: 52 49 46 46 ... 57 45 42 50
+                    if (head[0] === 0x52 && head[1] === 0x49 && head[2] === 0x46 && head[3] === 0x46 &&
+                        head[8] === 0x57 && head[9] === 0x45 && head[10] === 0x42 && head[11] === 0x50) return true;
+                    // SVG: 以 "<svg" 或 "<?xml" 开头（文本型）
+                    if (blob.type === 'image/svg+xml') return true;
+                    // 无法识别时放行（避免误杀某些少见格式），但若 content-type 是 text/* 已在上面拒绝
+                    return true;
+                } catch (e) {
+                    return true; // 读取失败时放行，交给后续流程
+                }
+            }
+
+            /**
+             * 单张图片下载：直连优先，失败时（若配置了代理）走代理重试。
+             * 若主机已知需要代理，则优先代理。
+             */
+            async function downloadImageWithRetry(url, perStageRetries) {
                 const host = getHostOf(url);
-                // 同主机若已知需要代理，则优先走代理，省去一次必然失败的直连
-                const order = (host && proxyRequiredHosts.has(host)) ? [true, false] : [false, true];
+                const proxyPrefix = getProxyPrefix();
+
+                // 决定尝试顺序
+                let order;
+                if (host && proxyRequiredHosts.has(host) && proxyPrefix) {
+                    order = [proxyPrefix, null];      // 已知需代理：先代理
+                } else if (proxyPrefix) {
+                    order = [null, proxyPrefix];      // 默认：先直连，失败再代理
+                } else {
+                    order = [null];                   // 无代理：仅直连
+                }
+
                 let lastErr = null;
 
                 for (let stage = 0; stage < order.length; stage++) {
                     const useProxy = order[stage];
-                    const isFinalStage = stage === order.length - 1;
+                    const isLastStage = stage === order.length - 1;
 
-                    for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    for (let attempt = 0; attempt < perStageRetries; attempt++) {
                         try {
                             const blob = await fetchImageBlob(url, useProxy);
+                            // 成功：统计与记忆
                             if (useProxy) {
                                 if (host) proxyRequiredHosts.add(host);
-                                proxyUsedCount++;
-                                console.info(`🔄 已通过代理下载: ${url}`);
+                                stats.proxy++;
+                            } else {
+                                stats.direct++;
                             }
                             return blob;
                         } catch (err) {
                             lastErr = err;
-                            // 该阶段最后一次尝试也失败则跳出，进入下一阶段（直连 <-> 代理）
-                            if (isFinalStage && attempt === maxRetries - 1) break;
-                            await sleep(600 * (attempt + 1));
+                            const isLastAttempt = isLastStage && attempt === perStageRetries - 1;
+                            if (isLastAttempt) break;
+
+                            // 429 限流：退避更长；其余错误：线性退避
+                            const delay = err.status === 429
+                                ? 1500 * (attempt + 1)
+                                : 500 * (attempt + 1);
+                            await sleep(delay);
                         }
                     }
                 }
 
                 console.warn(`图片下载最终失败 (${url}):`, lastErr && lastErr.message);
+                stats.failed++;
                 return null;
             }
 
-            // ==================== 创建ZIP/CBZ ====================
+            // ==================== 创建 ZIP / CBZ ====================
             async function createZip(imagesWithBlobs, progressCallback) {
                 const zip = new JSZip();
                 const total = imagesWithBlobs.length;
@@ -1183,30 +1187,25 @@
                     const img = imagesWithBlobs[i];
                     const pageNum = String(i + 1).padStart(padding, '0');
                     const ext = img.ext || 'jpg';
-                    const filename = `${pageNum}.${ext}`;
-                    zip.file(filename, img.blob, { compression: 'DEFLATE', compressionOptions: { level: 6 } });
-
-                    if (progressCallback && i % 3 === 0) {
-                        progressCallback(i / total);
-                    }
+                    zip.file(`${pageNum}.${ext}`, img.blob);
+                    if (progressCallback && i % 5 === 0) progressCallback(i / total * 0.5);
                 }
 
-                if (progressCallback) progressCallback(1);
-
-                const blob = await zip.generateAsync({
-                    type: 'blob',
-                    compression: 'DEFLATE',
-                    compressionOptions: { level: 6 },
-                }, (meta) => {
-                    if (progressCallback && meta.percent) {
-                        progressCallback(meta.percent / 100);
+                return await zip.generateAsync(
+                    {
+                        type: 'blob',
+                        compression: 'DEFLATE',
+                        compressionOptions: { level: 6 },
+                    },
+                    (meta) => {
+                        if (progressCallback && meta.percent) {
+                            progressCallback(0.5 + (meta.percent / 100) * 0.5);
+                        }
                     }
-                });
-
-                return blob;
+                );
             }
 
-            // ==================== 创建EPUB ====================
+            // ==================== 创建 EPUB ====================
             async function createEpub(title, imagesWithBlobs, progressCallback) {
                 const zip = new JSZip();
                 const total = imagesWithBlobs.length;
@@ -1214,23 +1213,22 @@
                 const uuid = generateUUID();
                 const safeTitle = escapeXml(title);
 
-                // 1. mimetype（必须第一个，不压缩）
+                // 1. mimetype（不压缩，必须第一个）
                 zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
 
                 // 2. META-INF/container.xml
                 const containerXml = `<?xml version="1.0" encoding="UTF-8"?>
-        <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
-            <rootfiles>
-                <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
-            </rootfiles>
-        </container>`;
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+    <rootfiles>
+        <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+    </rootfiles>
+</container>`;
                 zip.folder('META-INF').file('container.xml', containerXml);
 
-                // 3. 创建OEBPS文件夹
+                // 3. OEBPS 目录
                 const oebps = zip.folder('OEBPS');
                 const imagesFolder = oebps.folder('images');
 
-                // 添加所有图片
                 const imageEntries = [];
                 for (let i = 0; i < total; i++) {
                     const img = imagesWithBlobs[i];
@@ -1240,134 +1238,124 @@
                     const imgPath = `images/${imgFilename}`;
 
                     imagesFolder.file(imgFilename, img.blob);
-
-                    const mimeType = getMimeType(ext);
                     imageEntries.push({
                         id: `img${pageNum}`,
                         href: imgPath,
-                        mediaType: mimeType,
-                        pageNum: pageNum,
+                        mediaType: getMimeType(ext),
+                        pageNum,
                     });
 
-                    if (progressCallback && i % 3 === 0) {
-                        progressCallback((i / total) * 0.6);
+                    if (progressCallback && i % 5 === 0) {
+                        progressCallback((i / total) * 0.4);
                     }
                 }
 
-                // 4. 为每张图片创建XHTML页面
+                // 4. XHTML 页面
                 const pageEntries = [];
                 for (let i = 0; i < total; i++) {
                     const imgEntry = imageEntries[i];
-                    const pageId = `page${imgEntry.pageNum}`;
                     const pageFilename = `page_${imgEntry.pageNum}.xhtml`;
 
                     const xhtmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE html>
-        <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
-        <head>
-            <title>第 ${i + 1} 页</title>
-            <meta charset="UTF-8"/>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <style>
-                body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
-                img { max-width: 100%; max-height: 100vh; object-fit: contain; display: block; }
-                @media (prefers-color-scheme: dark) { body { background: #1a1a1a; } }
-            </style>
-        </head>
-        <body>
-            <div style="text-align:center;">
-                <img src="${imgEntry.href}" alt="第 ${i + 1} 页"/>
-            </div>
-        </body>
-        </html>`;
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+    <title>第 ${i + 1} 页</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
+        img { max-width: 100%; max-height: 100vh; object-fit: contain; display: block; }
+        @media (prefers-color-scheme: dark) { body { background: #1a1a1a; } }
+    </style>
+</head>
+<body>
+    <div style="text-align:center;">
+        <img src="${imgEntry.href}" alt="第 ${i + 1} 页"/>
+    </div>
+</body>
+</html>`;
 
                     oebps.file(pageFilename, xhtmlContent);
                     pageEntries.push({
-                        id: pageId,
+                        id: `page${imgEntry.pageNum}`,
                         href: pageFilename,
                         mediaType: 'application/xhtml+xml',
                     });
 
-                    if (progressCallback && i % 3 === 0) {
-                        progressCallback(0.6 + (i / total) * 0.25);
+                    if (progressCallback && i % 5 === 0) {
+                        progressCallback(0.4 + (i / total) * 0.25);
                     }
                 }
 
                 // 5. content.opf
                 const manifestItems = [
-                    ...pageEntries.map(p =>
-                        `<item id="${p.id}" href="${p.href}" media-type="${p.mediaType}"/>`
-                    ),
-                    ...imageEntries.map(img =>
-                        `<item id="${img.id}" href="${img.href}" media-type="${img.mediaType}"/>`
-                    ),
-                ].join('\n                ');
+                    ...pageEntries.map(p => `<item id="${p.id}" href="${p.href}" media-type="${p.mediaType}"/>`),
+                    ...imageEntries.map(img => `<item id="${img.id}" href="${img.href}" media-type="${img.mediaType}"/>`),
+                ].join('\n        ');
 
-                const spineItems = pageEntries.map(p =>
-                    `<itemref idref="${p.id}"/>`
-                ).join('\n            ');
+                const spineItems = pageEntries.map(p => `<itemref idref="${p.id}"/>`).join('\n        ');
 
                 const contentOpf = `<?xml version="1.0" encoding="UTF-8"?>
-        <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">
-            <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-                <dc:title>${safeTitle}</dc:title>
-                <dc:identifier id="book-id">urn:uuid:${uuid}</dc:identifier>
-                <dc:language>zh-CN</dc:language>
-                <dc:date>${new Date().toISOString().split('T')[0]}</dc:date>
-                <meta property="rendition:layout">pre-paginated</meta>
-                <meta property="rendition:spread">none</meta>
-                <meta property="rendition:orientation">portrait</meta>
-                <meta name="generator" content="Telegra.ph Comic Downloader"/>
-            </metadata>
-            <manifest>
-                ${manifestItems}
-            </manifest>
-            <spine>
-                ${spineItems}
-            </spine>
-        </package>`;
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <dc:title>${safeTitle}</dc:title>
+        <dc:identifier id="book-id">urn:uuid:${uuid}</dc:identifier>
+        <dc:language>zh-CN</dc:language>
+        <dc:date>${new Date().toISOString().split('T')[0]}</dc:date>
+        <meta property="rendition:layout">pre-paginated</meta>
+        <meta property="rendition:spread">none</meta>
+        <meta property="rendition:orientation">portrait</meta>
+        <meta name="generator" content="Telegra.ph Comic Downloader"/>
+    </metadata>
+    <manifest>
+        ${manifestItems}
+    </manifest>
+    <spine>
+        ${spineItems}
+    </spine>
+</package>`;
 
                 oebps.file('content.opf', contentOpf);
 
-                // 6. toc.ncx（EPUB 2兼容）
+                // 6. toc.ncx（EPUB 2 兼容）
                 const navPoints = pageEntries.map((p, i) => `
-                <navPoint id="nav${p.id}" playOrder="${i + 1}">
-                    <navLabel><text>第 ${i + 1} 页</text></navLabel>
-                    <content src="${p.href}"/>
-                </navPoint>`).join('');
+        <navPoint id="nav${p.id}" playOrder="${i + 1}">
+            <navLabel><text>第 ${i + 1} 页</text></navLabel>
+            <content src="${p.href}"/>
+        </navPoint>`).join('');
 
                 const tocNcx = `<?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
-        <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
-            <head>
-                <meta name="dtb:uid" content="urn:uuid:${uuid}"/>
-                <meta name="dtb:depth" content="1"/>
-                <meta name="dtb:totalPageCount" content="${total}"/>
-                <meta name="dtb:maxPageNumber" content="${total}"/>
-            </head>
-            <docTitle><text>${safeTitle}</text></docTitle>
-            <navMap>
-        ${navPoints}
-            </navMap>
-        </ncx>`;
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+    <head>
+        <meta name="dtb:uid" content="urn:uuid:${uuid}"/>
+        <meta name="dtb:depth" content="1"/>
+        <meta name="dtb:totalPageCount" content="${total}"/>
+        <meta name="dtb:maxPageNumber" content="${total}"/>
+    </head>
+    <docTitle><text>${safeTitle}</text></docTitle>
+    <navMap>${navPoints}
+    </navMap>
+</ncx>`;
 
                 oebps.file('toc.ncx', tocNcx);
 
-                if (progressCallback) progressCallback(0.95);
+                if (progressCallback) progressCallback(0.7);
 
-                // 生成EPUB
-                const blob = await zip.generateAsync({
-                    type: 'blob',
-                    compression: 'DEFLATE',
-                    compressionOptions: { level: 6 },
-                }, (meta) => {
-                    if (progressCallback && meta.percent) {
-                        progressCallback(0.95 + (meta.percent / 100) * 0.05);
+                // 7. 生成
+                return await zip.generateAsync(
+                    {
+                        type: 'blob',
+                        compression: 'DEFLATE',
+                        compressionOptions: { level: 6 },
+                    },
+                    (meta) => {
+                        if (progressCallback && meta.percent) {
+                            progressCallback(0.7 + (meta.percent / 100) * 0.3);
+                        }
                     }
-                });
-
-                if (progressCallback) progressCallback(1);
-                return blob;
+                );
             }
 
             // ==================== 触发下载 ====================
@@ -1376,41 +1364,45 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
+                a.rel = 'noopener';
                 a.style.display = 'none';
                 document.body.appendChild(a);
                 a.click();
-                // 延迟清理
                 setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                    try {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } catch (e) { /* 忽略 */ }
                 }, 3000);
             }
 
             // ==================== 工具函数 ====================
             function sanitizeFilename(name) {
                 if (!name || typeof name !== 'string') return 'comic';
-                // 移除或替换不安全的字符
                 let safe = name
                     .replace(/[<>:"/\\|?*\x00-\x1f]/g, '')
                     .replace(/\s+/g, '_')
                     .replace(/\.{2,}/g, '.')
+                    .replace(/^\.+/, '')
                     .trim();
-                // 限制长度
                 if (safe.length > 120) safe = safe.substring(0, 120);
                 if (!safe) safe = 'comic';
                 return safe;
             }
 
             function escapeHtml(str) {
-                if (!str) return '';
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
+                if (str == null) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
             }
 
             function escapeXml(str) {
-                if (!str) return '';
-                return str
+                if (str == null) return '';
+                return String(str)
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;')
@@ -1428,14 +1420,13 @@
                     'bmp': 'image/bmp',
                     'svg': 'image/svg+xml',
                 };
-                return map[ext.toLowerCase()] || 'image/jpeg';
+                return map[(ext || '').toLowerCase()] || 'image/jpeg';
             }
 
             function generateUUID() {
-                if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-                    return crypto.randomUUID();
+                if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+                    try { return crypto.randomUUID(); } catch (e) { /* 降级 */ }
                 }
-                // fallback
                 return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                     const r = Math.random() * 16 | 0;
                     const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -1447,9 +1438,25 @@
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
 
-            // ==================== 初始化和事件监听 ====================
+            // ==================== 初始化 ====================
             function init() {
-                // 回车键触发获取
+                // 读取代理配置
+                const saved = loadProxyPrefix();
+                applyProxyPrefix(saved);
+                if (saved) {
+                    proxyInput.value = saved;
+                    // 若存在代理配置，默认展开设置面板提示用户
+                    settingsBody.classList.add('open');
+                    settingsToggle.classList.add('open');
+                }
+
+                // 代理输入变化 → 保存
+                proxyInput.addEventListener('input', () => {
+                    applyProxyPrefix(proxyInput.value);
+                    saveProxyPrefix(state.proxyPrefix);
+                });
+
+                // 回车触发获取
                 urlInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -1462,28 +1469,21 @@
                 progressContainer.classList.remove('active');
                 infoCard.style.display = 'none';
 
-                // 尝试从剪贴板读取（需要用户交互或权限）
-                // 这里不做自动读取，但可以做粘贴事件处理
-                urlInput.addEventListener('paste', () => {
-                    // 粘贴后自动触发获取（可选，这里保持手动）
-                    // 用户可自行点击按钮或按回车
-                });
-
-                console.log('📚 Telegra.ph 漫画下载器已就绪');
+                console.log('%c📚 Telegra.ph 漫画下载器已就绪', 'color:#5c9ce6;font-weight:bold;');
                 console.log('  支持格式: ZIP / CBZ / EPUB');
+                console.log('  代理配置: ' + (state.proxyPrefix ? '已启用' : '未配置（可在高级设置中添加）'));
                 console.log('  所有处理均在浏览器本地完成 ✅');
             }
 
-            // 启动
             init();
 
-            // ==================== 暴露全局函数 ====================
-            // 已在HTML中使用onclick绑定，此处确保全局可访问
+            // 暴露全局函数（供 HTML onclick 使用）
             window.fetchPage = fetchPage;
             window.selectFormat = selectFormat;
             window.selectAll = selectAll;
             window.deselectAll = deselectAll;
             window.startDownload = startDownload;
+            window.toggleSettings = toggleSettings;
         })();
     </script>
 </body>
