@@ -625,6 +625,16 @@
                 isDownloading: false,
             };
 
+            // ==================== 跨域代理配置 ====================
+            // 仅当直连下载因跨域(CORS)失败时，才使用该代理重试
+            const CORS_PROXY = 'https://telegraph-proxy.loong-539.workers.dev/?url=';
+            // 记录已知需要走代理的图片主机，同主机后续图片直接走代理，避免重复失败
+            const proxyRequiredHosts = new Set();
+            // 本次下载中经代理成功下载的图片数量
+            let proxyUsedCount = 0;
+            // 预览阶段代理回退计数（用于提示）
+            let previewProxyFallbackCount = 0;
+
             // ==================== DOM 引用 ====================
             const $ = (sel) => document.querySelector(sel);
             const $$ = (sel) => document.querySelectorAll(sel);
@@ -725,6 +735,7 @@
                 state.pageData = null;
                 state.images = [];
                 state.selectedIndices = new Set();
+                previewProxyFallbackCount = 0;
 
                 try {
                     const apiUrl = `https://api.telegra.ph/getPage?path=${encodeURIComponent(path)}&return_content=true`;
@@ -847,7 +858,7 @@
                 `;
             }
 
-            // ==================== 渲染预览 ====================
+            // ==================== 渲染预览（保持直接加载，失败时代理回退） ====================
             function renderPreview() {
                 previewGrid.innerHTML = '';
                 if (state.images.length === 0) {
@@ -864,13 +875,29 @@
                     item.onclick = () => toggleImageSelection(i, item);
 
                     const imgEl = document.createElement('img');
+                    // 保持原有的直接加载逻辑不变
                     imgEl.src = img.url;
                     imgEl.alt = `Page ${i + 1}`;
                     imgEl.loading = 'lazy';
+                    // 标记该 img 是否已经尝试过代理回退，防止无限循环
+                    imgEl.dataset.proxyRetry = 'false';
+
                     imgEl.onerror = function() {
-                        this.src =
-                            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="130" height="170" fill="%233a3f4b"><rect width="130" height="170" rx="8"/><text x="65" y="90" text-anchor="middle" fill="%23a0a6b0" font-size="14">加载失败</text></svg>';
+                        // 如果已经尝试过代理回退，则显示占位图
+                        if (this.dataset.proxyRetry === 'true') {
+                            this.src =
+                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="130" height="170" fill="%233a3f4b"><rect width="130" height="170" rx="8"/><text x="65" y="90" text-anchor="middle" fill="%23a0a6b0" font-size="14">加载失败</text></svg>';
+                            return;
+                        }
+                        // 标记已回退，并尝试使用代理加载
+                        this.dataset.proxyRetry = 'true';
+                        previewProxyFallbackCount++;
+                        const proxyUrl = CORS_PROXY + encodeURIComponent(this.dataset.originalSrc || img.url);
+                        this.src = proxyUrl;
                     };
+
+                    // 保存原始地址，供代理回退使用
+                    imgEl.dataset.originalSrc = img.url;
 
                     const pageNum = document.createElement('span');
                     pageNum.className = 'page-number';
@@ -937,6 +964,7 @@
                 if (selectedImages.length === 0) return;
 
                 state.isDownloading = true;
+                proxyUsedCount = 0;
                 downloadBtn.disabled = true;
                 fetchBtn.disabled = true;
                 downloadBtn.innerHTML = '<span class="spinner"></span> 准备下载...';
@@ -1043,7 +1071,11 @@
                     const finalFilename = `${safeTitle}.${fileExtension}`;
                     triggerDownload(blob, finalFilename);
 
-                    showToast(`🎉 下载已开始！共 ${downloadedImages.length} 张图片`, 'success');
+                    const proxyNote = proxyUsedCount > 0 ?
+                        `（其中 ${proxyUsedCount} 张经代理下载）` : '';
+                    const previewNote = previewProxyFallbackCount > 0 ?
+                        `，预览时有 ${previewProxyFallbackCount} 张经代理加载` : '';
+                    showToast(`🎉 下载已开始！共 ${downloadedImages.length} 张图片${proxyNote}${previewNote}`, 'success');
 
                     // 短暂延迟后重置UI
                     await sleep(800);
@@ -1070,27 +1102,74 @@
                 }
             };
 
-            // ==================== 下载图片（带重试） ====================
+            // ==================== 跨域代理工具 ====================
+            function buildProxyUrl(url) {
+                return CORS_PROXY + encodeURIComponent(url);
+            }
+
+            function getHostOf(url) {
+                try {
+                    return new URL(url).host;
+                } catch (e) {
+                    return '';
+                }
+            }
+
+            /**
+             * 单次抓取图片，返回 Blob（失败抛异常）
+             * @param {string} url 原始图片地址
+             * @param {boolean} useProxy 是否走代理
+             */
+            async function fetchImageBlob(url, useProxy) {
+                const target = useProxy ? buildProxyUrl(url) : url;
+                const response = await fetch(target, {
+                    mode: 'cors',
+                    signal: AbortSignal.timeout(30000),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const blob = await response.blob();
+                if (!blob || blob.size === 0) {
+                    throw new Error('空响应');
+                }
+                // 代理有时会返回 HTML 错误页，做个类型校验
+                if (blob.type && /^text\//i.test(blob.type)) {
+                    throw new Error('返回内容不是图片');
+                }
+                return blob;
+            }
+
+            // ==================== 下载图片（直连优先 + 跨域代理重试） ====================
             async function downloadImageWithRetry(url, maxRetries) {
-                for (let attempt = 0; attempt < maxRetries; attempt++) {
-                    try {
-                        const response = await fetch(url, {
-                            mode: 'cors',
-                            signal: AbortSignal.timeout(30000),
-                        });
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
+                const host = getHostOf(url);
+                // 同主机若已知需要代理，则优先走代理，省去一次必然失败的直连
+                const order = (host && proxyRequiredHosts.has(host)) ? [true, false] : [false, true];
+                let lastErr = null;
+
+                for (let stage = 0; stage < order.length; stage++) {
+                    const useProxy = order[stage];
+                    const isFinalStage = stage === order.length - 1;
+
+                    for (let attempt = 0; attempt < maxRetries; attempt++) {
+                        try {
+                            const blob = await fetchImageBlob(url, useProxy);
+                            if (useProxy) {
+                                if (host) proxyRequiredHosts.add(host);
+                                proxyUsedCount++;
+                                console.info(`🔄 已通过代理下载: ${url}`);
+                            }
+                            return blob;
+                        } catch (err) {
+                            lastErr = err;
+                            // 该阶段最后一次尝试也失败则跳出，进入下一阶段（直连 <-> 代理）
+                            if (isFinalStage && attempt === maxRetries - 1) break;
+                            await sleep(600 * (attempt + 1));
                         }
-                        return await response.blob();
-                    } catch (err) {
-                        if (attempt === maxRetries - 1) {
-                            console.warn(`图片下载最终失败 (${url}):`, err.message);
-                            return null;
-                        }
-                        // 等待后重试
-                        await sleep(1000 * (attempt + 1));
                     }
                 }
+
+                console.warn(`图片下载最终失败 (${url}):`, lastErr && lastErr.message);
                 return null;
             }
 
